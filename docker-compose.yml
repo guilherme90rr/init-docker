@@ -1,0 +1,41 @@
+version: "3"
+networks:
+  next_network:
+services:
+  nextapp:
+    build: ./app
+    restart: always
+    expose:
+      - 3030
+    ports:
+      - 3000:3000
+    networks:
+      - next_network
+    depends_on:
+      - db_postgres
+
+  db_postgres:
+   restart: always
+   image: postgres:alpine
+   deploy:
+     resources:
+       limits:         
+         cpus: '2'
+         memory: 2048M
+       reservations:  
+         cpus: '1'
+         memory: 2048M
+   # Cria dois volumes: O Primeiro para a inicialização e script inicial o Segundo para a persistência dos dados do Banco
+   volumes:
+     - ./db/create.sql:/docker-entrypoint-initdb.d/create.sql
+     - ./db/data:/var/lib/postgresql/data
+   environment:
+     POSTGRES_PASSWORD: nextadmin
+     POSTGRES_DB: nextadmin
+   expose:
+     - "5432"
+   networks:
+     - next_network
+  
+
+
