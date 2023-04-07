@@ -1,6 +1,10 @@
 version: "3"
+volumes:
+  my-datavolume:
+  my-apivolume:
 networks:
   next_network:
+    driver: bridge
 services:
   nextapp:
     build: ./app
@@ -12,11 +16,12 @@ services:
     networks:
       - next_network
     depends_on:
-      - db_postgres
+      - db_mysql
+      - api
 
-  db_postgres:
+  db_mysql:
    restart: always
-   image: postgres:alpine
+   image: mysql
    deploy:
      resources:
        limits:         
@@ -25,17 +30,34 @@ services:
        reservations:  
          cpus: '1'
          memory: 2048M
-   # Cria dois volumes: O Primeiro para a inicialização e script inicial o Segundo para a persistência dos dados do Banco
-   volumes:
-     - ./db/create.sql:/docker-entrypoint-initdb.d/create.sql
-     - ./db/data:/var/lib/postgresql/data
    environment:
-     POSTGRES_PASSWORD: nextadmin
-     POSTGRES_DB: nextadmin
+     MYSQL_ROOT_PASSWORD: nextadmin
+     MYSQL_DATABASE: bd_nextjs
+     MYSQL_USER: dev
+     MYSQL_PASSWORD: nextadmin
    expose:
-     - "5432"
+     - 3306
    networks:
-     - next_network
+     - next_network  
+   ports:
+     - 3306:3306
+   volumes:
+      - my-datavolume:/var/lib/mysql
+
+  api:
+    build: ./doitdocker-api
+    restart: always
+    networks:
+      - next_network
+    expose:
+      - 8080
+    depends_on:
+      - db_mysql
+    volumes:
+     - my-apivolume:/tmp
+    ports:
+      - 8080:8080
+      
   
 
 
