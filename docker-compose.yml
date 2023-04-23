@@ -1,0 +1,63 @@
+version: "3"
+volumes:
+  my-datavolume:
+  my-apivolume:
+networks:
+  next_network:
+    driver: bridge
+services:
+  nextapp:
+    build: ./app
+    restart: always
+    expose:
+      - 3030
+    ports:
+      - "3000:3000"
+    networks:
+      - next_network
+    depends_on:
+      - db_mysql
+      - apijava
+
+  db_mysql:
+   restart: always
+   image: mysql
+   deploy:
+     resources:
+       limits:         
+         cpus: '2'
+         memory: 2048M
+       reservations:  
+         cpus: '1'
+         memory: 2048M
+   environment:
+     MYSQL_ROOT_PASSWORD: nextadmin
+     MYSQL_DATABASE: bd_nextjs
+     MYSQL_USER: dev
+     MYSQL_PASSWORD: nextadmin
+   expose:
+     - 3306
+   networks:
+     - next_network  
+   ports:
+     - "3306"
+   volumes:
+      - my-datavolume:/var/lib/mysql
+
+  apijava:
+    build: ./doitdocker-api
+    restart: always
+    networks:
+      - next_network
+    expose:
+      - 8080
+    depends_on:
+      - db_mysql
+    volumes:
+     - my-apivolume:/tmp
+    ports:
+      - "8080:8080"
+      
+  
+
+
