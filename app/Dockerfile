@@ -5,9 +5,9 @@ ENV USERNAME dev
 
 RUN adduser -D $USERNAME
 
-
 WORKDIR /home/$USERNAME/app
 
+RUN chown ${USERNAME} .
 
 COPY package.json package-lock.json ./
 RUN npm install
@@ -18,8 +18,7 @@ COPY public ./public
 COPY styles ./styles
 COPY . .
 
-RUN chown -R $USERNAME /home/$USERNAME
+
 USER $USERNAME
 
 CMD [ "npm","run", "dev" ]
-

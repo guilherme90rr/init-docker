@@ -12,12 +12,12 @@ services:
     expose:
       - 3030
     ports:
-      - 3000:3000
+      - "3000:3000"
     networks:
       - next_network
     depends_on:
       - db_mysql
-      - api
+      - apijava
 
   db_mysql:
    restart: always
@@ -40,11 +40,11 @@ services:
    networks:
      - next_network  
    ports:
-     - 3306:3306
+     - "3306"
    volumes:
       - my-datavolume:/var/lib/mysql
 
-  api:
+  apijava:
     build: ./doitdocker-api
     restart: always
     networks:
@@ -56,7 +56,7 @@ services:
     volumes:
      - my-apivolume:/tmp
     ports:
-      - 8080:8080
+      - "8080:8080"
       
   
 
